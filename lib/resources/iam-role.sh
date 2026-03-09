@@ -26,18 +26,18 @@ fetch_iam_role_config() {
     role_json=$(echo "$role_json" | jq --arg doc "$policy_doc" '.Role.AssumeRolePolicyDocument = $doc')
   fi
 
-  # Get attached managed policies
+  # Get attached managed policies (sort by PolicyName for order-independent diff)
   local attached
-  attached=$(_aws_iam iam list-attached-role-policies --role-name "$role_name" --output json 2>/dev/null | jq -c '.AttachedPolicies')
+  attached=$(_aws_iam iam list-attached-role-policies --role-name "$role_name" --output json 2>/dev/null | jq -c '.AttachedPolicies | sort_by(.PolicyName)')
 
-  # Get inline policies
+  # Get inline policies (sort by PolicyName for order-independent diff)
   local inline_names
   inline_names=$(_aws_iam iam list-role-policies --role-name "$role_name" --output json 2>/dev/null | jq -r '.PolicyNames[]? // empty')
   local inline_policies='[]'
   if [[ -n "$inline_names" ]]; then
     inline_policies=$(echo "$inline_names" | while read -r pname; do
       _aws_iam iam get-role-policy --role-name "$role_name" --policy-name "$pname" --output json 2>/dev/null | jq -c '{PolicyName: .PolicyName, PolicyDocument: .PolicyDocument}'
-    done | jq -s .)
+    done | jq -s 'sort_by(.PolicyName)')
   fi
 
   # Combine into single JSON
