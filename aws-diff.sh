@@ -20,6 +20,8 @@ Arguments:
 Options:
   --from-profile PROFILE   AWS profile for from environment
   --to-profile PROFILE     AWS profile for to environment
+  --from-region REGION     AWS region for from (Lambda, SQS, DynamoDB, API Gateway)
+  --to-region REGION       AWS region for to
   --env-id PATTERN         Regex to strip env prefix (match -> empty string)
   --replace PAT REPL       Custom replacement (pattern, replacement)
   --replace-file PATH      File with pattern<TAB>replacement lines
@@ -41,6 +43,8 @@ main() {
 
   local from_profile=""
   local to_profile=""
+  local from_region=""
+  local to_region=""
   local env_id_pattern=""
   local replace_patterns=()
   local replace_file=""
@@ -54,6 +58,14 @@ main() {
         ;;
       --to-profile)
         to_profile="$2"
+        shift 2
+        ;;
+      --from-region)
+        from_region="$2"
+        shift 2
+        ;;
+      --to-region)
+        to_region="$2"
         shift 2
         ;;
       --env-id)
@@ -92,11 +104,39 @@ main() {
     done < "$replace_file"
   fi
 
-  local fetch_fn
+  local fetch_fn needs_region=false
   case "$resource_type" in
     iam-role)
       source "$SCRIPT_DIR/lib/resources/iam-role.sh"
       fetch_fn="fetch_iam_role_config"
+      ;;
+    lambda)
+      source "$SCRIPT_DIR/lib/resources/lambda.sh"
+      fetch_fn="fetch_lambda_config"
+      needs_region=true
+      ;;
+    s3-bucket)
+      source "$SCRIPT_DIR/lib/resources/s3-bucket.sh"
+      fetch_fn="fetch_s3_bucket_config"
+      ;;
+    api-gateway)
+      source "$SCRIPT_DIR/lib/resources/api-gateway.sh"
+      fetch_fn="fetch_api_gateway_config"
+      needs_region=true
+      ;;
+    sqs)
+      source "$SCRIPT_DIR/lib/resources/sqs.sh"
+      fetch_fn="fetch_sqs_config"
+      needs_region=true
+      ;;
+    iam-policy)
+      source "$SCRIPT_DIR/lib/resources/iam-policy.sh"
+      fetch_fn="fetch_iam_policy_config"
+      ;;
+    dynamodb)
+      source "$SCRIPT_DIR/lib/resources/dynamodb.sh"
+      fetch_fn="fetch_dynamodb_config"
+      needs_region=true
       ;;
     *)
       die "Unknown resource type: $resource_type"
@@ -106,8 +146,13 @@ main() {
   ensure_jq
 
   local from_json to_json
-  from_json=$($fetch_fn "$from_name" "$from_profile")
-  to_json=$($fetch_fn "$to_name" "$to_profile")
+  if [[ "$needs_region" == "true" ]]; then
+    from_json=$($fetch_fn "$from_name" "$from_profile" "$from_region")
+    to_json=$($fetch_fn "$to_name" "$to_profile" "$to_region")
+  else
+    from_json=$($fetch_fn "$from_name" "$from_profile")
+    to_json=$($fetch_fn "$to_name" "$to_profile")
+  fi
 
   from_json=$(echo "$from_json" | jq -c .)
   to_json=$(echo "$to_json" | jq -c .)
