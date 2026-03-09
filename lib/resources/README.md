@@ -9,6 +9,13 @@
 - `sqs` … SQS キュー（リージョン必要）
 - `iam-policy` … IAM カスタマーマネージドポリシー
 - `dynamodb` … DynamoDB テーブル（リージョン必要）
+- `network-acl` … Network ACL（リージョン必要）
+- `eventbridge` … EventBridge ルール（リージョン必要）
+- `vpc-endpoint` … VPC エンドポイント（リージョン必要）
+- `stepfunctions` … Step Functions ステートマシン（リージョン必要）
+- `security-group` … Security Group（リージョン必要）
+- `ecr` … ECR リポジトリ（リージョン必要）
+- `route-table` … Route Table（リージョン必要）
 
 ## 1. モジュールファイルを作成
 

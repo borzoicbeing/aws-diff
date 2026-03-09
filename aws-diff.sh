@@ -28,7 +28,7 @@ Options:
   --no-default-exclude     Skip default exclusions (ARN, ID, timestamps)
 
 Example:
-  $(basename "$0") iam-role Dev-MyRole1 Com-MyRole1 --env-id '(Dev-|Com-)'
+  $(basename "$0") iam-role dev-MyRole1 prd-MyRole1 --env-id '(dev-|prd-)'
 EOF
   exit 1
 }
@@ -136,6 +136,41 @@ main() {
     dynamodb)
       source "$SCRIPT_DIR/lib/resources/dynamodb.sh"
       fetch_fn="fetch_dynamodb_config"
+      needs_region=true
+      ;;
+    network-acl)
+      source "$SCRIPT_DIR/lib/resources/network-acl.sh"
+      fetch_fn="fetch_network_acl_config"
+      needs_region=true
+      ;;
+    eventbridge)
+      source "$SCRIPT_DIR/lib/resources/eventbridge.sh"
+      fetch_fn="fetch_eventbridge_config"
+      needs_region=true
+      ;;
+    vpc-endpoint)
+      source "$SCRIPT_DIR/lib/resources/vpc-endpoint.sh"
+      fetch_fn="fetch_vpc_endpoint_config"
+      needs_region=true
+      ;;
+    stepfunctions)
+      source "$SCRIPT_DIR/lib/resources/stepfunctions.sh"
+      fetch_fn="fetch_stepfunctions_config"
+      needs_region=true
+      ;;
+    security-group)
+      source "$SCRIPT_DIR/lib/resources/security-group.sh"
+      fetch_fn="fetch_security_group_config"
+      needs_region=true
+      ;;
+    ecr)
+      source "$SCRIPT_DIR/lib/resources/ecr.sh"
+      fetch_fn="fetch_ecr_config"
+      needs_region=true
+      ;;
+    route-table)
+      source "$SCRIPT_DIR/lib/resources/route-table.sh"
+      fetch_fn="fetch_route_table_config"
       needs_region=true
       ;;
     *)
