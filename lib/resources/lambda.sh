@@ -16,9 +16,9 @@ fetch_lambda_config() {
   local fn_json
   fn_json=$(_aws_lambda lambda get-function --function-name "$function_name" --output json 2>/dev/null) || die "Failed to get function: $function_name"
 
-  # Extract Configuration, exclude deployment-specific fields (CodeSha256, CodeSize, LastModified, RevisionId)
+  # Extract Configuration, exclude deployment-specific fields (CodeSha256, CodeSize, LastModified, RevisionId, Layers)
   local config
-  config=$(echo "$fn_json" | jq -c '.Configuration | del(.CodeSha256, .CodeSize, .LastModified, .RevisionId)')
+  config=$(echo "$fn_json" | jq -c '.Configuration | del(.CodeSha256, .CodeSize, .LastModified, .RevisionId, .Layers)')
 
   # Event source mappings (Kinesis, DynamoDB Streams, SQS, etc.)
   local event_sources
