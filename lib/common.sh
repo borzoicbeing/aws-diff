@@ -30,13 +30,15 @@ apply_default_exclusions() {
       s/arn:aws:[^"]+/ARN_PLACEHOLDER/g;
       s/A(ROA|IDA|NPA)[A-Z0-9]+/ID_PLACEHOLDER/g;
       s/\d{4}-\d{2}-\d{2}T[\d:.]+(Z|\+\d{2}:\d{2})/TIMESTAMP_PLACEHOLDER/g;
+      s/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/UUID_PLACEHOLDER/gi;
     '
   else
     # Fallback to sed -E
     echo "$json" | sed -E \
       -e 's/arn:aws:[^"]+/ARN_PLACEHOLDER/g' \
       -e 's/A(ROA|IDA|NPA)[A-Z0-9]+/ID_PLACEHOLDER/g' \
-      -e 's/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+(Z|\+[0-9]{2}:[0-9]{2})/TIMESTAMP_PLACEHOLDER/g'
+      -e 's/[0-9]{4}-[0-9]{2}-[0-9]{2}T[0-9:.]+(Z|\+[0-9]{2}:[0-9]{2})/TIMESTAMP_PLACEHOLDER/g' \
+      -e 's/[0-9a-f]{8}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{4}-[0-9a-f]{12}/UUID_PLACEHOLDER/gi'
   fi
 }
 
